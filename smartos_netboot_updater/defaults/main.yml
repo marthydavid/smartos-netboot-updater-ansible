@@ -1,0 +1,7 @@
+download: false # prior download
+notification_recipient: tamas@gerczei.eu
+smarthost: mail
+tftp_dir: /data/tftproot
+image_dir: "{{ tftp_dir }}/smartos"
+tftp_user: tftp
+tftp_group: tftp

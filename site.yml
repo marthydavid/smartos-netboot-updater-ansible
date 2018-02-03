@@ -1,0 +1,9 @@
+# TODO: for now we take the PXE environment for granted, so won't install and configure DHCP and TFTP servers; that should become another block defaulting not to be processed
+- name: prepare current SmartOS platform image for netbooting on a PXE server
+  hosts:
+    - pxe_server
+  gather_facts: no
+  vars:
+    download: true
+  roles:
+  - {role: smartos_netboot_updater}

@@ -1,0 +1,18 @@
+- name: fetch platform image
+  get_url:
+    src: https://us-east.manta.joyent.com/Joyent_Dev/public/SmartOS/platform-latest.tgz # no Manta at eu-ams-1
+    dest: /var/tmp/
+  when: download == "true"
+
+- name: obtain provided platform image
+  copy:
+    src: /var/tmp/platform-latest.tgz
+    dest: /tmp/
+    remote_src: yes
+  register: tarball
+  when: download == "true"
+
+- name: process new tarball
+  include_tasks:
+    - tarball.yml
+  when: tarball|changed

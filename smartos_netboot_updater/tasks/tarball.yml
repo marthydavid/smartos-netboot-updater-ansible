@@ -1,0 +1,38 @@
+- name: extract new platform image
+  unarchive:
+    src: /tmp/platform-latest.tgz
+    dest: "{{ image_dir }}"
+    extra_opts:
+      - --transform
+      - 's/^platform-//;s/i86pc/platform\/i86pc/'
+    remote_src: yes
+    owner: "{{ tftp_user }}"
+    group: "{{ tftp_group }}"
+  become: yes
+
+- name: find images
+  find:
+    paths: "{{ image_dir }}"
+    file_type: directory
+  register: found_images
+
+- name: determine latest release
+  set_fact:
+    last_release: "{{ ( found_images.files | sort(attribute='mtime',reverse=true) | first )['path'] | basename }}"
+
+- name: generate iPXE configuration
+  template:
+    src: smartos_ipxe.j2
+    dest: "{{ tftp_dir }}/smartos.ipxe"
+    owner: "{{ tftp_user }}"
+    group: "{{ tftp_group }}"
+    backup: yes
+  become: yes
+
+- name: send e-mail notification
+  mail:
+    host: "{{ smarthost }}"
+    from: "Raspi Root <noreply@fejezd.be>"
+    to: "{{ notification_recipient }}"
+    subject: "SmartOS update ({{ last_release }}) available"
+    body: "created {{ image_dir }}/{{ last_release }} and {{ tftp_dir }}/smartos.ipxe"
